@@ -12,7 +12,9 @@ namespace SimHubSF1000UDP.Packets_F123
 
         public static byte[] Read()
         {
-            var start = !SimHubSF1000UDPSettings.Instance.OnlySendDataIfGameRunning || (pluginManager.LastData?.GameRunning ?? false);
+            var last = pluginManager.LastData;
+            var data = last?.NewData;
+            var start = !SimHubSF1000UDPSettings.Instance.OnlySendDataIfGameRunning || (last?.GameRunning ?? false);
 
             if (!start)
             {
@@ -41,18 +43,18 @@ namespace SimHubSF1000UDP.Packets_F123
             {
                 m_header = header,
                 m_weather = 0,
-                m_trackTemperature = Utils.ClampIntegerValue<sbyte>(pluginManager.LastData?.NewData?.RoadTemperature),
-                m_airTemperature = Utils.ClampIntegerValue<sbyte>(pluginManager.LastData?.NewData?.AirTemperature),
-                m_totalLaps = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.TotalLaps),
-                m_trackLength = Utils.ClampIntegerValue<ushort>(pluginManager.LastData?.NewData?.TrackLength),
+                m_trackTemperature = Utils.ClampIntegerValue<sbyte>(data?.RoadTemperature),
+                m_airTemperature = Utils.ClampIntegerValue<sbyte>(data?.AirTemperature),
+                m_totalLaps = Utils.ClampIntegerValue<byte>(data?.TotalLaps),
+                m_trackLength = Utils.ClampIntegerValue<ushort>(data?.TrackLength),
                 m_sessionType = 0,
                 m_trackId = -1,
                 m_formula = 0,
-                m_sessionTimeLeft = Utils.ClampIntegerValue<ushort>((pluginManager.LastData?.NewData?.SessionTimeLeft ?? new TimeSpan()).TotalSeconds),
+                m_sessionTimeLeft = Utils.ClampIntegerValue<ushort>((data?.SessionTimeLeft ?? new TimeSpan()).TotalSeconds),
                 m_sessionDuration = 600,
                 m_pitSpeedLimit = 80,
-                m_gamePaused = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.GamePaused),
-                m_isSpectating = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.Spectating),
+                m_gamePaused = Utils.ClampIntegerValue<byte>(last?.GamePaused),
+                m_isSpectating = Utils.ClampIntegerValue<byte>(data?.Spectating),
                 m_spectatorCarIndex = 0,
                 m_sliProNativeSupport = 0,
                 m_numMarshalZones = 0,
@@ -66,8 +68,8 @@ namespace SimHubSF1000UDP.Packets_F123
                 m_seasonLinkIdentifier = 0,
                 m_weekendLinkIdentifier = 0,
                 m_sessionLinkIdentifier = 0,
-                m_pitStopWindowIdealLap = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.TotalLaps / 2),
-                m_pitStopWindowLatestLap = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.TotalLaps - 1),
+                m_pitStopWindowIdealLap = Utils.ClampIntegerValue<byte>(data?.TotalLaps / 2),
+                m_pitStopWindowLatestLap = Utils.ClampIntegerValue<byte>(data?.TotalLaps - 1),
                 m_pitStopRejoinPosition = 1,
                 m_steeringAssist = 0,
                 m_brakingAssist = 0,
@@ -91,14 +93,7 @@ namespace SimHubSF1000UDP.Packets_F123
                 m_numRedFlagPeriods = 0,
             };
 
-            int size = Marshal.SizeOf(packet);
-            byte[] arr = new byte[size];
-
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(packet, ptr, true);
-            Marshal.Copy(ptr, arr, 0, size);
-            Marshal.FreeHGlobal(ptr);
-            return arr;
+            return Utils.StructToBytes(packet);
         }
     }
 }

@@ -60,6 +60,12 @@ You should see these two files (you can ignore the steps for F1 games):
 
   ![image](https://github.com/ducng99/SimHub-SF1000-UDP/assets/49080794/2f8eceac-2206-4f18-83ac-60f22471a2b4)
 
+- (Optional) Choose what the blue and red side LEDs of the wheel show with the `Side LEDs (blue/red)` dropdown, then click `Save`:
+  - `Battery`: blue = hybrid deploying, red = hybrid harvesting (LMU). Blue/black flags also use these LEDs.
+  - `ABS / TC`: red = ABS intervention or wheel lock, blue = TC intervention or wheel spin. Uses SimHub's `ABSActive` / `TCActive`, so it depends on what the game (or SimHub's lock detection) provides.
+  
+  The orange LED (yellow flag) is not affected by this setting.
+
 - Select your game in SimHub `Games` screen if you haven't already (if you have SimHub Licensed Edition then you don't have to manually select the game - not an ad).
 
 - Start your game and the wheel should show the dash.

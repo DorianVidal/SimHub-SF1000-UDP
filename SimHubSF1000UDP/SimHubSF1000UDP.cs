@@ -24,10 +24,17 @@ namespace SimHubSF1000UDP
         /// <param name="pluginManager"></param>
         public void End(PluginManager pluginManager)
         {
-            // Save settings
-            this.SaveCommonSettings("GeneralSettings", Settings);
+            SaveSettings();
 
             UDPServer.DestroyInstance();
+        }
+
+        /// <summary>
+        /// Persist the current settings to SimHub's common settings store
+        /// </summary>
+        public void SaveSettings()
+        {
+            this.SaveCommonSettings("GeneralSettings", Settings);
         }
 
         /// <summary>

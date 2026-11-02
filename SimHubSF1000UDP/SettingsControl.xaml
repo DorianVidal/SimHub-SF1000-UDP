@@ -34,6 +34,13 @@
                     </ComboBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
+                    <TextBlock Margin="0 5 5 0">Side LEDs (blue/red):</TextBlock>
+                    <ComboBox Name="LEDMode_Select" SelectedValuePath="Content">
+                        <ComboBoxItem Name="LEDMode_Battery">Battery (blue = deploy, red = harvest)</ComboBoxItem>
+                        <ComboBoxItem Name="LEDMode_ABSTC">ABS / TC (red = ABS or wheel lock, blue = TC or wheel spin)</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
                     <TextBlock Margin="0 5 5 0">Send rate:</TextBlock>
                     <ComboBox Name="SendRate" SelectedValuePath="Content">
                         <ComboBoxItem Name="SendRate_20">20hz</ComboBoxItem>

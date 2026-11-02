@@ -16,7 +16,9 @@ namespace SimHubSF1000UDP.Packets_F123
 
         public static byte[] Read()
         {
-            var start = !SimHubSF1000UDPSettings.Instance.OnlySendDataIfGameRunning || (pluginManager.LastData?.GameRunning ?? false);
+            var last = pluginManager.LastData;
+            var data = last?.NewData;
+            var start = !SimHubSF1000UDPSettings.Instance.OnlySendDataIfGameRunning || (last?.GameRunning ?? false);
 
             if (!start)
             {
@@ -49,31 +51,34 @@ namespace SimHubSF1000UDP.Packets_F123
                 m_timeTrialRivalCarIdx = 255,
             };
 
-            float lapDistance = Utils.ClampFloatingValue<float>(Convert.ToDouble(pluginManager.LastData?.NewData?.TrackPositionPercent) * Convert.ToDouble(pluginManager.LastData?.NewData?.TrackLength));
-            float totalDistance = lapDistance + Utils.ClampIntegerValue<ushort>(pluginManager.LastData?.NewData?.CompletedLaps) * Utils.ClampIntegerValue<ushort>(pluginManager.LastData?.NewData?.TrackLength);
-            byte pitStatus = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.IsInPit) == 1 ? (byte)2 : Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.IsInPitLane);
+            float lapDistance = Utils.ClampFloatingValue<float>(Convert.ToDouble(data?.TrackPositionPercent) * Convert.ToDouble(data?.TrackLength));
+            float totalDistance = lapDistance + Utils.ClampIntegerValue<ushort>(data?.CompletedLaps) * Utils.ClampIntegerValue<ushort>(data?.TrackLength);
+            byte pitStatus = Utils.ClampIntegerValue<byte>(data?.IsInPit) == 1 ? (byte)2 : Utils.ClampIntegerValue<byte>(data?.IsInPitLane);
 
-            CheckPitLaneTimer(pluginManager.LastData?.NewData?.IsInPitLane == 1);
+            Utils.SplitSectorTime(data?.Sector1Time, out var sector1Ms, out var sector1Minutes);
+            Utils.SplitSectorTime(data?.Sector2Time, out var sector2Ms, out var sector2Minutes);
+
+            CheckPitLaneTimer(data?.IsInPitLane == 1);
 
             packet.m_lapData[0] = new LapData
             {
-                m_lastLapTimeInMS = Utils.ClampFloatingValue<uint>((pluginManager.LastData?.NewData?.LastLapTime ?? new TimeSpan()).TotalMilliseconds),
-                m_currentLapTimeInMS = Utils.ClampFloatingValue<uint>((pluginManager.LastData?.NewData?.CurrentLapTime ?? new TimeSpan()).TotalMilliseconds),
-                m_sector1TimeInMS = Utils.ClampIntegerValue<ushort>((pluginManager.LastData?.NewData?.Sector1Time ?? new TimeSpan()).TotalMilliseconds),
-                m_sector1TimeMinutes = Utils.ClampIntegerValue<byte>((pluginManager.LastData?.NewData?.Sector1Time ?? new TimeSpan()).Minutes),
-                m_sector2TimeInMS = Utils.ClampIntegerValue<ushort>((pluginManager.LastData?.NewData?.Sector2Time ?? new TimeSpan()).TotalMilliseconds),
-                m_sector2TimeMinutes = Utils.ClampIntegerValue<byte>((pluginManager.LastData?.NewData?.Sector2Time ?? new TimeSpan()).Minutes),
+                m_lastLapTimeInMS = Utils.ClampFloatingValue<uint>((data?.LastLapTime ?? new TimeSpan()).TotalMilliseconds),
+                m_currentLapTimeInMS = Utils.ClampFloatingValue<uint>((data?.CurrentLapTime ?? new TimeSpan()).TotalMilliseconds),
+                m_sector1TimeInMS = sector1Ms,
+                m_sector1TimeMinutes = sector1Minutes,
+                m_sector2TimeInMS = sector2Ms,
+                m_sector2TimeMinutes = sector2Minutes,
                 m_deltaToCarInFrontInMS = 0,
                 m_deltaToRaceLeaderInMS = 0,
                 m_lapDistance = lapDistance,
                 m_totalDistance = totalDistance,
                 m_safetyCarDelta = 0,
-                m_carPosition = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.Position),
-                m_currentLapNum = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.CurrentLap),
+                m_carPosition = Utils.ClampIntegerValue<byte>(data?.Position),
+                m_currentLapNum = Utils.ClampIntegerValue<byte>(data?.CurrentLap),
                 m_pitStatus = pitStatus,
                 m_numPitStops = 0,
-                m_sector = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.CurrentSectorIndex),
-                m_currentLapInvalid = Utils.ClampIntegerValue<byte>((pluginManager.LastData?.NewData?.LapInvalidated ?? false) ? 1 : 0),
+                m_sector = Utils.ClampIntegerValue<byte>(data?.CurrentSectorIndex),
+                m_currentLapInvalid = Utils.ClampIntegerValue<byte>((data?.LapInvalidated ?? false) ? 1 : 0),
                 m_penalties = 0,
                 m_totalWarnings = 0,
                 m_cornerCuttingWarnings = 0,
@@ -82,9 +87,9 @@ namespace SimHubSF1000UDP.Packets_F123
                 m_gridPosition = 1,
                 m_driverStatus = 4,
                 m_resultStatus = 2,
-                m_pitLaneTimerActive = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.IsInPitLane),
+                m_pitLaneTimerActive = Utils.ClampIntegerValue<byte>(data?.IsInPitLane),
                 m_pitLaneTimeInLaneInMS = Utils.ClampIntegerValue<ushort>(PitLaneStopwatch.ElapsedMilliseconds),
-                m_pitStopTimerInMS = Utils.ClampIntegerValue<ushort>(pluginManager.LastData?.NewData?.IsInPitSince),
+                m_pitStopTimerInMS = Utils.ClampIntegerValue<ushort>(data?.IsInPitSince),
                 m_pitStopShouldServePen = 0,
             };
 
@@ -93,14 +98,7 @@ namespace SimHubSF1000UDP.Packets_F123
                 packet.m_lapData[0].m_currentLapNum--;
             }
 
-            int size = Marshal.SizeOf(packet);
-            byte[] arr = new byte[size];
-
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(packet, ptr, true);
-            Marshal.Copy(ptr, arr, 0, size);
-            Marshal.FreeHGlobal(ptr);
-            return arr;
+            return Utils.StructToBytes(packet);
         }
 
         private static void CheckPitLaneTimer(bool isInPitLane)

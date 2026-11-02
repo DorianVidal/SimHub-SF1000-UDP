@@ -12,7 +12,9 @@ namespace SimHubSF1000UDP.Packets_F123
 
         public static byte[] Read()
         {
-            var start = !SimHubSF1000UDPSettings.Instance.OnlySendDataIfGameRunning || (pluginManager.LastData?.GameRunning ?? false);
+            var last = pluginManager.LastData;
+            var data = last?.NewData;
+            var start = !SimHubSF1000UDPSettings.Instance.OnlySendDataIfGameRunning || (last?.GameRunning ?? false);
 
             if (!start)
             {
@@ -40,18 +42,11 @@ namespace SimHubSF1000UDP.Packets_F123
             var packet = new PacketParticipantsData
             {
                 m_header = header,
-                m_numActiveCars = Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.OpponentsCount),
+                m_numActiveCars = Utils.ClampIntegerValue<byte>(data?.OpponentsCount),
                 m_participants = new ParticipantData[22]
             };
 
-            int size = Marshal.SizeOf(packet);
-            byte[] arr = new byte[size];
-
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(packet, ptr, true);
-            Marshal.Copy(ptr, arr, 0, size);
-            Marshal.FreeHGlobal(ptr);
-            return arr;
+            return Utils.StructToBytes(packet);
         }
     }
 }

@@ -12,11 +12,23 @@
         public bool OnlySendDataIfGameRunning = true;
         public UDPFormats UDPFormat = UDPFormats.F123;
         public byte UDPSendRate = 120;
+        public LEDModes LEDMode = LEDModes.Battery;
 
         public SimHubSF1000UDPSettings()
         {
             Instance = this;
         }
+    }
+
+    /// <summary>
+    /// What the blue and red side LEDs of the wheel are used for
+    /// </summary>
+    public enum LEDModes
+    {
+        /// <summary>Blue = hybrid deploying, red = hybrid harvesting (flags still apply)</summary>
+        Battery,
+        /// <summary>Red = ABS / wheel lock, blue = TC / wheel spin</summary>
+        ABSTC,
     }
 
     public enum UDPFormats

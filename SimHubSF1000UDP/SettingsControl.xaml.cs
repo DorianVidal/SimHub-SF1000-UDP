@@ -36,6 +36,12 @@ namespace SimHubSF1000UDP
                 _ => UDPFormat_F123,
             };
 
+            LEDMode_Select.SelectedItem = Plugin.Settings.LEDMode switch
+            {
+                LEDModes.ABSTC => LEDMode_ABSTC,
+                _ => LEDMode_Battery,
+            };
+
             SendRate.SelectedItem = Plugin.Settings.UDPSendRate switch
             {
                 20 => SendRate_20,
@@ -49,10 +55,18 @@ namespace SimHubSF1000UDP
         private void SaveButtonPrimary_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             // Save to plugin settings
-            Plugin.Settings.ReceiverIP = NewReceiverIP.IPAddress.ToString();
+            // Keep the previous IP/port when the new value is empty or incomplete
+            if (NewReceiverIP.IPAddress != null)
+            {
+                Plugin.Settings.ReceiverIP = NewReceiverIP.IPAddress.ToString();
+            }
             CurrentReceiverIP.Text = Plugin.Settings.ReceiverIP;
 
-            Plugin.Settings.ReceiverPort = Utils.ClampIntegerValue<ushort>(NewReceiverPort.Text);
+            var newPort = Utils.ClampIntegerValue<ushort>(NewReceiverPort.Text);
+            if (newPort > 0)
+            {
+                Plugin.Settings.ReceiverPort = newPort;
+            }
             CurrentReceiverPort.Text = Plugin.Settings.ReceiverPort.ToString();
 
             Plugin.Settings.OnlySendDataIfGameRunning = OnlySendDataIfGameRunning.IsChecked ?? true;
@@ -64,6 +78,15 @@ namespace SimHubSF1000UDP
             else if (UDPFormat_Select.SelectedItem == UDPFormat_F123)
             {
                 Plugin.Settings.UDPFormat = UDPFormats.F123;
+            }
+
+            if (LEDMode_Select.SelectedItem == LEDMode_ABSTC)
+            {
+                Plugin.Settings.LEDMode = LEDModes.ABSTC;
+            }
+            else if (LEDMode_Select.SelectedItem == LEDMode_Battery)
+            {
+                Plugin.Settings.LEDMode = LEDModes.Battery;
             }
 
             if (SendRate.SelectedItem == SendRate_20)
@@ -82,6 +105,8 @@ namespace SimHubSF1000UDP
             {
                 Plugin.Settings.UDPSendRate = 120;
             }
+
+            Plugin.SaveSettings();
 
             UDPServer.Instance.Update();
         }

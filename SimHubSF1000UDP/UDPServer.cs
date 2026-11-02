@@ -11,7 +11,7 @@ namespace SimHubSF1000UDP
     {
         private static UDPServer? _instance = null;
         private UdpClient? UDPClient = null;
-        private IPEndPoint ReceiverAddress = new(IPAddress.Parse(SimHubSF1000UDPSettings.Instance.ReceiverIP), SimHubSF1000UDPSettings.Instance.ReceiverPort);
+        private IPEndPoint? ReceiverAddress = null;
         private double SendDelayMS = 1000.0 / 60;
 
         private bool IsRunning = false;
@@ -41,9 +41,15 @@ namespace SimHubSF1000UDP
 
         public void Start()
         {
+            if (!IPAddress.TryParse(SimHubSF1000UDPSettings.Instance.ReceiverIP, out var receiverIP))
+            {
+                SimHub.Logging.Current.Error("[SimHub SF1000 UDP] Invalid receiver IP \"" + SimHubSF1000UDPSettings.Instance.ReceiverIP + "\". UDP server not started");
+                return;
+            }
+
             UDPClient = new();
             IsRunning = true;
-            ReceiverAddress = new(IPAddress.Parse(SimHubSF1000UDPSettings.Instance.ReceiverIP), SimHubSF1000UDPSettings.Instance.ReceiverPort);
+            ReceiverAddress = new(receiverIP, SimHubSF1000UDPSettings.Instance.ReceiverPort);
             SendDelayMS = 1000.0 / SimHubSF1000UDPSettings.Instance.UDPSendRate;
 
             SimHub.Logging.Current.Info("[SimHub SF1000 UDP] UDP server started. Sending to " + SimHubSF1000UDPSettings.Instance.ReceiverIP + ":" + SimHubSF1000UDPSettings.Instance.ReceiverPort + " every " + SendDelayMS + "ms");
@@ -96,7 +102,7 @@ namespace SimHubSF1000UDP
                     try
                     {
                         var sessionData = (byte[])outputPacket.GetMethod("Read").Invoke(null, null);
-                        if (UDPClient != null && sessionData.Length > 0)
+                        if (UDPClient != null && ReceiverAddress != null && sessionData.Length > 0)
                         {
                             UDPClient.Send(sessionData, sessionData.Length, ReceiverAddress);
                         }

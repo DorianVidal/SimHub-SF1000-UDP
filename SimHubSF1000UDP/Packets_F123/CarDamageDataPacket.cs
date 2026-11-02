@@ -12,7 +12,9 @@ namespace SimHubSF1000UDP.Packets_F123
 
         public static byte[] Read()
         {
-            var start = !SimHubSF1000UDPSettings.Instance.OnlySendDataIfGameRunning || (pluginManager.LastData?.GameRunning ?? false);
+            var last = pluginManager.LastData;
+            var data = last?.NewData;
+            var start = !SimHubSF1000UDPSettings.Instance.OnlySendDataIfGameRunning || (last?.GameRunning ?? false);
 
             if (!start)
             {
@@ -47,17 +49,17 @@ namespace SimHubSF1000UDP.Packets_F123
             {
                 m_tyresWear = new float[4]
                 {
-                    100f - Utils.ClampFloatingValue<float>(pluginManager.LastData?.NewData?.TyreWearRearLeft),
-                    100f - Utils.ClampFloatingValue<float>(pluginManager.LastData?.NewData?.TyreWearRearRight),
-                    100f - Utils.ClampFloatingValue<float>(pluginManager.LastData?.NewData?.TyreWearFrontLeft),
-                    100f - Utils.ClampFloatingValue<float>(pluginManager.LastData?.NewData?.TyreWearFrontRight),
+                    100f - Utils.ClampFloatingValue<float>(data?.TyreWearRearLeft),
+                    100f - Utils.ClampFloatingValue<float>(data?.TyreWearRearRight),
+                    100f - Utils.ClampFloatingValue<float>(data?.TyreWearFrontLeft),
+                    100f - Utils.ClampFloatingValue<float>(data?.TyreWearFrontRight),
                 },
                 m_tyresDamage = new byte[4]
                 {
-                    (byte)(100 - Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.TyreWearRearLeft)),
-                    (byte)(100 - Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.TyreWearRearRight)),
-                    (byte)(100 - Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.TyreWearFrontLeft)),
-                    (byte)(100 - Utils.ClampIntegerValue<byte>(pluginManager.LastData?.NewData?.TyreWearFrontRight)),
+                    (byte)(100 - Utils.ClampIntegerValue<byte>(data?.TyreWearRearLeft)),
+                    (byte)(100 - Utils.ClampIntegerValue<byte>(data?.TyreWearRearRight)),
+                    (byte)(100 - Utils.ClampIntegerValue<byte>(data?.TyreWearFrontLeft)),
+                    (byte)(100 - Utils.ClampIntegerValue<byte>(data?.TyreWearFrontRight)),
                 },
                 m_brakesDamage = new byte[4] { 0, 0, 0, 0 },
                 m_frontLeftWingDamage = 0,
@@ -80,14 +82,7 @@ namespace SimHubSF1000UDP.Packets_F123
                 m_engineSeized = 0,
             };
 
-            int size = Marshal.SizeOf(packet);
-            byte[] arr = new byte[size];
-
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(packet, ptr, true);
-            Marshal.Copy(ptr, arr, 0, size);
-            Marshal.FreeHGlobal(ptr);
-            return arr;
+            return Utils.StructToBytes(packet);
         }
     }
 }
