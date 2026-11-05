@@ -73,19 +73,17 @@ namespace SimHubSF1000UDP
         }
 
         /**
-         * <summary>Side LEDs flag for the ABS/TC LED mode. Yellow flag (orange LED) keeps priority, then red = ABS / wheel lock, blue = TC / wheel spin, then green flag</summary>
+         * <summary>Hybrid battery charge of the player's car, from 0 to 1. Le Mans Ultimate uses its raw telemetry, other games use SimHub's ERSStored / ERSMax. Null if unknown</summary>
          */
-        public static sbyte GetABSTCFlag(GameReaderCommon.StatusDataBase data)
+        public static double? GetBatteryFraction(SimHub.Plugins.PluginManager pluginManager, GameReaderCommon.StatusDataBase data)
         {
-            if (ClampIntegerValue<byte>(data?.Flag_Yellow) > 0)
-                return 3;
-            if (ClampIntegerValue<byte>(data?.ABSActive) > 0)
-                return 4;
-            if (ClampIntegerValue<byte>(data?.TCActive) > 0)
-                return 2;
-            if (ClampIntegerValue<byte>(data?.Flag_Green) > 0)
-                return 1;
-            return 0;
+            if (pluginManager.GameName == "LMU")
+            {
+                return GetLMUBatteryFraction(pluginManager);
+            }
+
+            var max = ClampFloatingValue<double>(data?.ERSMax);
+            return max > 0 ? Math.Max(0, Math.Min(1, ClampFloatingValue<double>(data?.ERSStored) / max)) : null;
         }
 
         /**

@@ -38,7 +38,15 @@
                     <ComboBox Name="LEDMode_Select" SelectedValuePath="Content">
                         <ComboBoxItem Name="LEDMode_Battery">Battery (blue = deploy, red = harvest)</ComboBoxItem>
                         <ComboBoxItem Name="LEDMode_ABSTC">ABS / TC (red = ABS or wheel lock, blue = TC or wheel spin)</ComboBoxItem>
+                        <ComboBoxItem Name="LEDMode_BatteryLevel">Battery level (blue = high, red = low, see thresholds below)</ComboBoxItem>
                     </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
+                    <TextBlock Margin="0 5 5 0">Battery level LEDs: blue above</TextBlock>
+                    <TextBox Name="LEDBatteryHigh" Width="40" KeyDown="ReceiverPort_KeyDown" MaxLength="3" VerticalAlignment="Center">90</TextBox>
+                    <TextBlock Margin="5 5 5 0">% , red below</TextBlock>
+                    <TextBox Name="LEDBatteryLow" Width="40" KeyDown="ReceiverPort_KeyDown" MaxLength="3" VerticalAlignment="Center">10</TextBox>
+                    <TextBlock Margin="5 5 0 0">%</TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
                     <TextBlock Margin="0 5 5 0">Send rate:</TextBlock>

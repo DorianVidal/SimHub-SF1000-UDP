@@ -113,6 +113,7 @@
     <Compile Include="SimHubSF1000UDP.cs" />
     <Compile Include="UDPServer.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="WheelLeds.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Properties\DesignTimeResources.xaml" Condition="'$(DesignTime)'=='true' OR ('$(SolutionPath)'!='' AND Exists('$(SolutionPath)') AND '$(BuildingInsideVisualStudio)'!='true' AND '$(BuildingInsideExpressionBlend)'!='true')">

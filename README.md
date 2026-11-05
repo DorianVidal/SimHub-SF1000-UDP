@@ -64,6 +64,8 @@ You should see these two files (you can ignore the steps for F1 games):
   - `Battery`: blue = hybrid deploying, red = hybrid harvesting (LMU). Blue/black flags also use these LEDs.
   - `ABS / TC`: red = ABS intervention or wheel lock, blue = TC intervention or wheel spin. Uses SimHub's `ABSActive` / `TCActive`, so it depends on what the game (or SimHub's lock detection) provides.
   
+  - `Battery level`: blue = battery above the high threshold (default 90%), red = battery below the low threshold (default 10%). Both thresholds can be changed below the dropdown (the low one must stay under the high one). Battery comes from LMU's hybrid battery, or from SimHub's ERS stored / max for other games when available.
+
   The orange LED (yellow flag) is not affected by this setting.
 
 - Select your game in SimHub `Games` screen if you haven't already (if you have SimHub Licensed Edition then you don't have to manually select the game - not an ad).

@@ -13,6 +13,8 @@
         public UDPFormats UDPFormat = UDPFormats.F123;
         public byte UDPSendRate = 120;
         public LEDModes LEDMode = LEDModes.Battery;
+        public byte LEDBatteryHighPercent = 90;
+        public byte LEDBatteryLowPercent = 10;
 
         public SimHubSF1000UDPSettings()
         {
@@ -29,6 +31,8 @@
         Battery,
         /// <summary>Red = ABS / wheel lock, blue = TC / wheel spin</summary>
         ABSTC,
+        /// <summary>Blue = battery above LEDBatteryHighPercent, red = battery below LEDBatteryLowPercent</summary>
+        BatteryLevel,
     }
 
     public enum UDPFormats
